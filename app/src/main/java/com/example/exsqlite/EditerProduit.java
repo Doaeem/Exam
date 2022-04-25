@@ -1,13 +1,16 @@
 package com.example.exsqlite;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
@@ -15,7 +18,7 @@ import java.util.ArrayList;
 public class EditerProduit  extends AppCompatActivity {
 
     MyDBProduit db;
-    Button btn;
+    Button btn1,btn2;
     Spinner spin;
     EditText e1,e2,e3,e4;
     ArrayList<Produit> prds;
@@ -24,7 +27,8 @@ public class EditerProduit  extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editer_produit);
 
-        btn = findViewById(R.id.edit);
+        btn1 = findViewById(R.id.btnupdate);
+        btn2 = findViewById(R.id.btndelete);
         e1 = findViewById(R.id.lib);
         e2 = findViewById(R.id.fam);
         e3 = findViewById(R.id.pra);
@@ -35,30 +39,87 @@ public class EditerProduit  extends AppCompatActivity {
         prds = MyDBProduit.getListeProduits(db.getReadableDatabase());
         ArrayList<String> LstPrds = new ArrayList<>();
         for (Produit p : prds) {
-            LstPrds.add(p.getIdProduit() + " - " + p.getLibelle());
+            LstPrds.add(String.format("%d - %s",p.getIdProduit(),p.getLibelle()));
         }
         ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, LstPrds);
         spin.setAdapter(ad);
-        btn.setOnClickListener(new View.OnClickListener() {
+
+        spin.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Produit p = prds.get(i);
+
+                e1.setText(p.getLibelle());
+                e2.setText(p.getFamille());
+                e3.setText(String.valueOf(p.getPrixAchat()));
+                e4.setText(String.valueOf(p.getPrixVente()));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(e1.getText().toString().isEmpty() || e2.getText().toString().isEmpty()
-                        || e3.getText().toString().isEmpty() || e4.getText().toString().isEmpty())
-                    Toast.makeText(EditerProduit.this, "Erreur !", Toast.LENGTH_SHORT).show();
-                else {
-                    Produit p =prds.get(spin.getSelectedItemPosition());
-                    p.setLibelle(e1.getText().toString());
-                    p.setFamille(e2.getText().toString());
-                    p.setPrixAchat(Double.valueOf(e3.getText().toString()));
-                    p.setPrixVente(Double.valueOf(e4.getText().toString()));
-                    MyDBProduit.Update_Produit(db.getWritableDatabase(),p);
-                    Toast.makeText(EditerProduit.this, "Edit avec succes !", Toast.LENGTH_SHORT).show();
-                    e1.getText().clear();
-                    e2.getText().clear();
-                    e3.getText().clear();
-                    e4.getText().clear();
-                    e1.requestFocus();
-                }
+                AlertDialog.Builder alert = new AlertDialog.Builder(EditerProduit.this);
+                alert.setTitle("Mise a jour du produit !");
+                alert.setMessage("Voulez-vous vraiment modifier ce produit ?");
+
+                alert.setPositiveButton("Modifier", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String lib = e1.getText().toString();
+                        String fam = e2.getText().toString();
+                        double prixachat = Double.valueOf(e3.getText().toString());
+                        double prixvente = Double.valueOf(e4.getText().toString());
+                        int pos = spin.getSelectedItemPosition();
+                        int id = prds.get(pos).getIdProduit();
+
+                        Produit p = new Produit(id, lib, fam, prixachat, prixvente);
+
+                        if (MyDBProduit.Update_Produit(db.getWritableDatabase(), p) != -1)
+                            Toast.makeText(EditerProduit.this, "Modification effectue", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(EditerProduit.this, "Modification echoue", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Toast.makeText(EditerProduit.this, "Modification Annulee", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                alert.show();
+            }
+        });
+        btn2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(EditerProduit.this);
+                alert.setTitle("Suppression du produit !");
+                alert.setMessage("Voulez-vous vraiment supprimer ce produit ?");
+
+                alert.setPositiveButton("Supprimer", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        int pos = spin.getSelectedItemPosition();
+                        int id = prds.get(pos).getIdProduit();
+
+                        if(MyDBProduit.Delete_Produit(db.getWritableDatabase(),id)!=-1)
+                            Toast.makeText(EditerProduit.this, "Suppresion effectue",Toast.LENGTH_LONG).show();
+                        else
+                            Toast.makeText(EditerProduit.this, "Suppresion echoue",Toast.LENGTH_LONG).show();
+                    }
+                });
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Toast.makeText(EditerProduit.this,"Suppression annule",Toast.LENGTH_LONG).show();
+                    }
+                });
+                alert.show();
             }
         });
     }
