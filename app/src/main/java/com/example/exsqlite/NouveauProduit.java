@@ -27,18 +27,46 @@ public class NouveauProduit  extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (e1.getText().toString().isEmpty() || e2.getText().toString().isEmpty()
-                        || e3.getText().toString().isEmpty() || e4.getText().toString().isEmpty())
-                    Toast.makeText(NouveauProduit.this, "Remplissez tous les champs !", Toast.LENGTH_LONG).show();
-                else {
-                    MyDBProduit.Insert_Produit(db.getWritableDatabase(), new Produit(1, e1.getText().toString(), e2.getText().toString(), Double.valueOf(e3.getText().toString()), Double.valueOf(e4.getText().toString())));
-                    Toast.makeText(NouveauProduit.this, "Ajout avec succes !", Toast.LENGTH_SHORT).show();
-                    e1.getText().clear();
-                    e2.getText().clear();
-                    e3.getText().clear();
-                    e4.getText().clear();
+                if(e1.getText().toString().isEmpty()){
+                    Toast.makeText(NouveauProduit.this, "Libelle vide", Toast.LENGTH_SHORT).show();
                     e1.requestFocus();
+                    return;
                 }
+
+                if(e2.getText().toString().isEmpty()){
+                    Toast.makeText(NouveauProduit.this, "Famille vide", Toast.LENGTH_SHORT).show();
+                    e2.requestFocus();
+                    return;
+                }
+
+                if(e3.getText().toString().isEmpty()){
+                    Toast.makeText(NouveauProduit.this, "Prix achat vide", Toast.LENGTH_SHORT).show();
+                    e3.requestFocus();
+                    return;
+                }
+
+                if(e4.getText().toString().isEmpty()){
+                    Toast.makeText(NouveauProduit.this, "Prix vente vide", Toast.LENGTH_SHORT).show();
+                    e4.requestFocus();
+                    return;
+                }
+                String lib = e1.getText().toString();
+                String fam = e2.getText().toString();
+                double achat =Double.parseDouble(e3.getText().toString());
+                double vente =Double.parseDouble(e4.getText().toString());
+
+                Produit p = new Produit(1,lib,fam,achat,vente);
+
+                if(MyDBProduit.Insert_Produit(db.getWritableDatabase(),p)!=-1) {
+                        Toast.makeText(NouveauProduit.this, "Ajout avec succes !", Toast.LENGTH_SHORT).show();
+                        e1.getText().clear();
+                        e2.getText().clear();
+                        e3.getText().clear();
+                        e4.getText().clear();
+                        e1.requestFocus();
+                }
+                else
+                    Toast.makeText(NouveauProduit.this, "Ajout echoue !", Toast.LENGTH_SHORT).show();
             }
         });
     }

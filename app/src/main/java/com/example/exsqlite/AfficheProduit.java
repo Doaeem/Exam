@@ -34,7 +34,7 @@ public class AfficheProduit  extends AppCompatActivity {
 
         ArrayList<String> lstPrds=new ArrayList<>();
         for(Produit p: prds){
-            lstPrds.add(p.getIdProduit()+" - "+ p.getLibelle());
+            lstPrds.add(String.format("%d - %s",p.getIdProduit(),p.getLibelle()));
         }
         ArrayAdapter<String> ad=new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,lstPrds);
         spin.setAdapter(ad);
@@ -45,8 +45,8 @@ public class AfficheProduit  extends AppCompatActivity {
                 Produit p= prds.get(i);
                 t1.setText("Libelle : "+p.getLibelle());
                 t2.setText("Famille : "+p.getFamille());
-                t3.setText(String.format("%s : %.2f","Prix Achat :",p.getPrixAchat()));
-                t4.setText(String.format("%s : %.2f","Prix Vente :",p.getPrixVente()));
+                t3.setText(String.format("Prix Achat :",p.getPrixAchat()));
+                t4.setText(String.format("Prix Vente :",p.getPrixVente()));
             }
 
             @Override
